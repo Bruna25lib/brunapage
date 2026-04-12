@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bruna Liborio Tonon — IA & Automação Inteligente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #05050a;
+      --surface: #0d0d18;
+      --surface2: #131320;
+      --border: rgba(130, 90, 255, 0.15);
+      --accent: #7c3aed;
+      --accent2: #a855f7;
+      --accent3: #06b6d4;
+      --gold: #f59e0b;
+      --text: #e8e8f0;
+      --muted: #8888aa;
+      --glow: rgba(124, 58, 237, 0.35);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--accent2);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+      mix-blend-mode: screen;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--accent2);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.18s ease, width 0.3s, height 0.3s, opacity 0.3s;
+      opacity: 0.5;
+    }
+
+    /* Grid noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.4;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 4rem;
+      background: rgba(5, 5, 10, 0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      color: var(--text);
+    }
+    .nav-logo span { color: var(--accent2); }
+
+    .nav-links {
+      display: flex; gap: 2.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute; bottom: -4px; left: 0;
+      width: 0; height: 1px;
+      background: var(--accent2);
+      transition: width 0.3s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      padding: 0 4rem;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 50%, rgba(124, 58, 237, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 40% at 60% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: float 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .orb-1 { width: 400px; height: 400px; background: rgba(124,58,237,0.15); top: -10%; left: -5%; animation-delay: 0s; }
+    .orb-2 { width: 300px; height: 300px; background: rgba(6,182,212,0.1); top: 60%; right: -5%; animation-delay: -3s; }
+    .orb-3 { width: 200px; height: 200px; background: rgba(245,158,11,0.08); top: 30%; right: 20%; animation-delay: -5s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      max-width: 900px;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent3);
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.8rem;
+      animation: fadeUp 0.8s ease both;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 2.5rem; height: 1px;
+      background: var(--accent3);
+    }
+
+    .hero-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(3rem, 7vw, 6.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+
+    .hero-name .line-1 { display: block; color: var(--text); }
+    .hero-name .line-2 {
+      display: block;
+      background: linear-gradient(135deg, var(--accent2) 0%, var(--accent3) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-title {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      letter-spacing: 0.03em;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+    .hero-title strong { color: var(--accent2); font-weight: 500; }
+
+    .hero-desc {
+      max-width: 560px;
+      font-size: 1rem;
+      line-height: 1.75;
+      color: var(--muted);
+      margin-bottom: 3rem;
+      font-weight: 300;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      animation: fadeUp 0.8s 0.4s ease both;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 4px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 0 30px rgba(124,58,237,0.4);
+    }
+    .btn-primary:hover {
+      background: var(--accent2);
+      box-shadow: 0 0 50px rgba(168,85,247,0.5);
+      transform: translateY(-2px);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      transform: translateY(-2px);
+    }
+
+    /* Stats strip */
+    .stats-strip {
+      position: absolute;
+      right: 4rem; top: 50%;
+      transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 2rem;
+      animation: fadeUp 1s 0.5s ease both;
+    }
+    .stat {
+      text-align: right;
+      border-right: 2px solid var(--accent2);
+      padding-right: 1.5rem;
+    }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-num span { color: var(--accent2); }
+    .stat-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.25rem; }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute; bottom: 2rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      color: var(--muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      animation: fadeIn 1.5s 1s ease both;
+    }
+    .scroll-line {
+      width: 1px; height: 50px;
+      background: linear-gradient(to bottom, var(--accent2), transparent);
+      animation: scrollPulse 2s ease infinite;
+    }
+    @keyframes scrollPulse {
+      0% { opacity: 1; transform: scaleY(1); }
+      100% { opacity: 0; transform: scaleY(0.3) translateY(20px); }
+    }
+
+    /* Section shared */
+    section { position: relative; z-index: 2; }
+
+    .section-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent3);
+      margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .section-label::before {
+      content: '';
+      display: inline-block;
+      width: 2rem; height: 1px;
+      background: var(--accent3);
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 3rem;
+      color: var(--text);
+    }
+
+    /* TABS */
+    .tabs-nav {
+      display: flex; gap: 0.25rem;
+      margin-bottom: 3rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.35rem;
+      width: fit-content;
+    }
+
+    .tab-btn {
+      padding: 0.7rem 1.8rem;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 0 20px rgba(124,58,237,0.4);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+
+    /* SOBRE */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .about-photo-wrap {
+      position: relative;
+    }
+    .about-photo-placeholder {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .about-photo-placeholder::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(124,58,237,0.1) 0%, rgba(6,182,212,0.05) 100%);
+    }
+    .photo-icon {
+      font-size: 4rem;
+      opacity: 0.3;
+    }
+    .photo-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+      padding: 0 2rem;
+    }
+    .about-corner {
+      position: absolute;
+      width: 40px; height: 40px;
+      border-color: var(--accent2);
+      border-style: solid;
+    }
+    .about-corner.tl { top: -8px; left: -8px; border-width: 2px 0 0 2px; }
+    .about-corner.br { bottom: -8px; right: -8px; border-width: 0 2px 2px 0; }
+
+    .about-text p {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+    .about-text p strong { color: var(--text); font-weight: 500; }
+
+    .skills-grid {
+      display: flex; flex-wrap: wrap; gap: 0.6rem;
+      margin-top: 2rem;
+    }
+    .skill-tag {
+      padding: 0.45rem 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+    .skill-tag:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    /* TIMELINE */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 3rem;
+      padding-left: 2rem;
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: all 0.5s;
+    }
+    .timeline-item.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -2.45rem; top: 0.35rem;
+      width: 10px; height: 10px;
+      background: var(--accent2);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent2);
+    }
+    .timeline-date {
+      font-size: 0.72rem;
+      color: var(--accent3);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+    .timeline-role {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+    .timeline-company {
+      font-size: 0.9rem;
+      color: var(--accent2);
+      margin-bottom: 0.75rem;
+    }
+    .timeline-desc {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    .timeline-tags {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      margin-top: 0.75rem;
+    }
+    .timeline-tag {
+      padding: 0.25rem 0.7rem;
+      background: rgba(124,58,237,0.1);
+      border: 1px solid rgba(124,58,237,0.2);
+      border-radius: 2px;
+      font-size: 0.7rem;
+      color: var(--accent2);
+    }
+
+    /* PROJECTS */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent3));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+    .project-card:hover { border-color: rgba(124,58,237,0.4); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+    .project-card:hover::before { transform: scaleX(1); }
+
+    .project-icon {
+      font-size: 2rem;
+      margin-bottom: 1.25rem;
+    }
+    .project-type {
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent3);
+      margin-bottom: 0.5rem;
+    }
+    .project-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+    .project-desc {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+    .project-footer {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .project-tags {
+      display: flex; gap: 0.4rem; flex-wrap: wrap;
+    }
+    .project-tag {
+      padding: 0.2rem 0.6rem;
+      background: rgba(6,182,212,0.08);
+      border: 1px solid rgba(6,182,212,0.2);
+      border-radius: 2px;
+      font-size: 0.68rem;
+      color: var(--accent3);
+    }
+
+    /* EVENTS */
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .event-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.75rem;
+      transition: all 0.3s;
+      display: flex; gap: 1.25rem;
+    }
+    .event-card:hover { border-color: rgba(245,158,11,0.3); transform: translateY(-3px); }
+
+    .event-date-box {
+      min-width: 58px;
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 6px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 0.6rem;
+      height: fit-content;
+    }
+    .event-day {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .event-mon {
+      font-size: 0.65rem;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .event-info { flex: 1; }
+    .event-type {
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.35rem;
+    }
+    .event-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+      line-height: 1.3;
+    }
+    .event-local {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* FORMAÇÃO */
+    .edu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .edu-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      transition: border-color 0.3s;
+    }
+    .edu-card:hover { border-color: rgba(124,58,237,0.4); }
+
+    .edu-icon { font-size: 1.75rem; margin-bottom: 1rem; }
+    .edu-degree {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+      line-height: 1.3;
+    }
+    .edu-inst {
+      font-size: 0.88rem;
+      color: var(--accent2);
+      margin-bottom: 0.25rem;
+    }
+    .edu-period {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .cert-list {
+      display: flex; flex-direction: column; gap: 0.75rem;
+      margin-top: 2rem;
+    }
+    .cert-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .cert-item:hover { border-color: rgba(124,58,237,0.4); }
+    .cert-icon { font-size: 1.25rem; }
+    .cert-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .cert-issuer {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+    .cert-badge {
+      margin-left: auto;
+      padding: 0.2rem 0.6rem;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 20px;
+      font-size: 0.65rem;
+      color: #10b981;
+      letter-spacing: 0.05em;
+    }
+
+    /* CONTACT */
+    .contact-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .contact-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .contact-cta {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+    .contact-cta span {
+      background: linear-gradient(135deg, var(--accent2), var(--accent3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .contact-sub {
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 2rem;
+    }
+
+    .contact-links {
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .contact-link {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .contact-link:hover { border-color: var(--accent2); transform: translateX(6px); }
+    .contact-link-icon { font-size: 1.5rem; }
+    .contact-link-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .contact-link-val {
+      font-size: 0.95rem;
+      color: var(--text);
+      font-weight: 500;
+      margin-top: 0.1rem;
+    }
+    .contact-link-arrow {
+      margin-left: auto;
+      color: var(--accent2);
+      font-size: 1.2rem;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 2.5rem 4rem;
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid var(--border);
+    }
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    .footer-logo span { color: var(--accent2); }
+    .footer-copy {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s, transform 0.6s;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .hero { padding: 0 1.5rem; }
+      .stats-strip { display: none; }
+      .about-grid, .edu-grid, .contact-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .section-inner { padding: 4rem 1.5rem; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; padding: 2rem 1.5rem; }
+      .tabs-nav { flex-wrap: wrap; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">BLT<span>.</span></div>
+    <ul class="nav-links">
+      <li><a href="#sobre">Sobre</a></li>
+      <li><a href="#trajetoria">Trajetória</a></li>
+      <li><a href="#projetos">Projetos</a></li>
+      <li><a href="#eventos">Eventos</a></li>
+      <li><a href="#formacao">Formação</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="sobre">
+    <div class="hero-bg"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="hero-content">
+      <p class="hero-eyebrow">Engenheira · IA · Automação</p>
+      <h1 class="hero-name">
+        <span class="line-1">Bruna</span>
+        <span class="line-2">Liborio Tonon</span>
+      </h1>
+      <p class="hero-title">Conectando negócios ao futuro com <strong>Automação Inteligente & IA</strong></p>
+      <p class="hero-desc">
+        Engenheira formada pelo Instituto Mauá de Tecnologia, com mais de 5 anos de experiência
+        em operações comerciais e implementação de soluções inteligentes. Transformo complexidade
+        em resultados escaláveis — onde dado, estratégia e tecnologia se encontram.
+      </p>
+      <div class="hero-actions">
+        <a href="#projetos" class="btn btn-primary">Ver Projetos →</a>
+        <a href="#contato" class="btn btn-outline">Entrar em Contato</a>
+      </div>
+    </div>
+
+    <div class="stats-strip">
+      <div class="stat">
+        <div class="stat-num">5<span>+</span></div>
+        <div class="stat-label">Anos de Exp.</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3<span>+</span></div>
+        <div class="stat-label">Setores Atuados</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">IA<span>∞</span></div>
+        <div class="stat-label">Foco de Atuação</div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <div class="scroll-line"></div>
+      <span>scroll</span>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT with TABS -->
+  <section>
+    <div class="section-inner">
+      <div class="tabs-nav">
+        <button class="tab-btn active" onclick="openTab('sobre-tab')">Sobre Mim</button>
+        <button class="tab-btn" onclick="openTab('trajetoria-tab')">Trajetória</button>
+        <button class="tab-btn" onclick="openTab('projetos-tab')" id="tab-projetos">Projetos</button>
+        <button class="tab-btn" onclick="openTab('eventos-tab')">Eventos</button>
+        <button class="tab-btn" onclick="openTab('formacao-tab')">Formação</button>
+      </div>
+
+      <!-- ABA: SOBRE MIM -->
+      <div class="tab-content active" id="sobre-tab">
+        <div class="about-grid">
+          <div class="about-photo-wrap reveal">
+            <div class="about-photo-placeholder">
+              <div class="about-corner tl"></div>
+              <div class="about-corner br"></div>
+              <div class="photo-icon">👩‍💻</div>
+              <p class="photo-hint">Adicione aqui sua foto profissional substituindo esta div pela tag &lt;img&gt;</p>
+            </div>
+          </div>
+          <div class="about-text reveal">
+            <p class="section-label">Quem sou eu</p>
+            <h2 class="section-title" style="font-size:2rem; margin-bottom:1.5rem">Tecnologia a serviço<br>de resultados reais.</h2>
+            <p>Sou <strong>Bruna Liborio Tonon</strong>, engenheira com formação pelo <strong>Instituto Mauá de Tecnologia (IMT)</strong>, apaixonada por transformar processos complexos em soluções inteligentes e escaláveis.</p>
+            <p>Ao longo de mais de <strong>5 anos de carreira</strong>, atuei nas áreas comercial e de operações, sempre com visão analítica e foco em resultados. Acredito que processos bem desenhados, habilitados por tecnologia e sustentados por dados, são o caminho para resultados consistentes e duradouros.</p>
+            <p>Minha missão: <strong>conectar negócios ao futuro</strong> — com automação inteligente, IA e estratégias que geram impacto real.</p>
+            <div class="skills-grid">
+              <span class="skill-tag">Inteligência Artificial</span>
+              <span class="skill-tag">Automação de Processos</span>
+              <span class="skill-tag">CRM & ERP</span>
+              <span class="skill-tag">Gestão Comercial</span>
+              <span class="skill-tag">Análise de Dados</span>
+              <span class="skill-tag">Inovação</span>
+              <span class="skill-tag">Marketing Digital</span>
+              <span class="skill-tag">Liderança</span>
+              <span class="skill-tag">Engenharia</span>
+              <span class="skill-tag">Estratégia de Negócios</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA: TRAJETÓRIA -->
+      <div class="tab-content" id="trajetoria-tab">
+        <p class="section-label" id="trajetoria">Linha do tempo</p>
+        <h2 class="section-title">Minha Trajetória<br>Profissional</h2>
+        <div class="timeline">
+
+          <div class="timeline-item reveal">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2023 — Presente</div>
+            <div class="timeline-role">Especialista em Automação Inteligente & IA</div>
+            <div class="timeline-company">Projetos & Consultoria</div>
+            <div class="timeline-desc">Conectando negócios ao futuro por meio de automação inteligente e inteligência artificial. Implementação de soluções que aumentam a capacidade das equipes e impulsionam a expansão dos negócios, aliando raciocínio analítico a estratégias inteligentes.</div>
+            <div class="timeline-tags">
+              <span class="timeline-tag">IA</span>
+              <span class="timeline-tag">Automação</span>
+              <span class="timeline-tag">Estratégia</span>
+              <span class="timeline-tag">Consultoria</span>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2021 — 2023</div>
+            <div class="timeline-role">Analista de Operações & Marketing</div>
+            <div class="timeline-company">Empresa de Tecnologia / SaaS</div>
+            <div class="timeline-desc">Atuação direta com liderança e apoio à equipe de marketing e área comercial (aquisição, implementação e recompra). Utilização de CRM Exact Sales, RD Marketing e ERP Bling. Desenvolvimento de projetos complexos desde a concepção até a implementação, garantindo alinhamento com as metas organizacionais.</div>
+            <div class="timeline-tags">
+              <span class="timeline-tag">CRM</span>
+              <span class="timeline-tag">ERP</span>
+              <span class="timeline-tag">Marketing</span>
+              <span class="timeline-tag">Operações</span>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2019 — 2021</div>
+            <div class="timeline-role">Analista Comercial & Projetos</div>
+            <div class="timeline-company">Setor Comercial</div>
+            <div class="timeline-desc">Contribuição para o desenvolvimento e implementação de estratégias de negócios para melhorar a eficiência operacional. Identificação de oportunidades de melhoria nos processos internos e apoio à tomada de decisão baseada em dados.</div>
+            <div class="timeline-tags">
+              <span class="timeline-tag">Comercial</span>
+              <span class="timeline-tag">Projetos</span>
+              <span class="timeline-tag">Análise de Dados</span>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2015 — 2019</div>
+            <div class="timeline-role">Graduação em Engenharia</div>
+            <div class="timeline-company">Instituto Mauá de Tecnologia (IMT)</div>
+            <div class="timeline-desc">Formação sólida em Engenharia, com projetos práticos voltados à resolução de problemas reais. Desenvolvimento de visão analítica, orientação a resultados e base técnica para aplicação de tecnologia em contextos de negócio.</div>
+            <div class="timeline-tags">
+              <span class="timeline-tag">Engenharia</span>
+              <span class="timeline-tag">IMT</span>
+              <span class="timeline-tag">Projetos Práticos</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ABA: PROJETOS -->
+      <div class="tab-content" id="projetos-tab">
+        <p class="section-label" id="projetos">O que construí</p>
+        <h2 class="section-title">Projetos de<br>Impacto</h2>
+        <div class="projects-grid">
+
+          <div class="project-card reveal">
+            <div class="project-icon">🤖</div>
+            <div class="project-type">Automação & IA</div>
+            <div class="project-name">Automação de Processos Comerciais com IA</div>
+            <div class="project-desc">Implementação de fluxos automatizados para equipes comerciais, reduzindo tempo operacional e aumentando a conversão de leads. Integração entre CRM, ERP e ferramentas de marketing.</div>
+            <div class="project-footer">
+              <div class="project-tags">
+                <span class="project-tag">IA</span>
+                <span class="project-tag">CRM</span>
+                <span class="project-tag">ERP</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-card reveal">
+            <div class="project-icon">📊</div>
+            <div class="project-type">Dados & Estratégia</div>
+            <div class="project-name">Dashboard de Inteligência Comercial</div>
+            <div class="project-desc">Criação de painel de dados unificado para monitoramento de KPIs de vendas, marketing e operações, permitindo tomada de decisão ágil baseada em dados em tempo real.</div>
+            <div class="project-footer">
+              <div class="project-tags">
+                <span class="project-tag">BI</span>
+                <span class="project-tag">Dados</span>
+                <span class="project-tag">KPIs</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-card reveal">
+            <div class="project-icon">⚙️</div>
+            <div class="project-type">Gestão de Projetos</div>
+            <div class="project-name">Implementação de ERP & CRM Integrados</div>
+            <div class="project-desc">Liderança do projeto de implementação de sistemas ERP Bling e CRM Exact Sales, com treinamento de equipes e padronização de processos para escalar as operações da empresa.</div>
+            <div class="project-footer">
+              <div class="project-tags">
+                <span class="project-tag">ERP Bling</span>
+                <span class="project-tag">Exact Sales</span>
+                <span class="project-tag">RD Marketing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-card reveal">
+            <div class="project-icon">🚀</div>
+            <div class="project-type">Inovação</div>
+            <div class="project-name">Estratégia de Crescimento com Automação</div>
+            <div class="project-desc">Desenvolvimento e execução de estratégia de negócios para melhoria da eficiência operacional, unindo automação inteligente, marketing digital e foco em experiência do cliente.</div>
+            <div class="project-footer">
+              <div class="project-tags">
+                <span class="project-tag">Growth</span>
+                <span class="project-tag">Marketing</span>
+                <span class="project-tag">Automação</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-card reveal" style="grid-column: span 2;">
+            <div class="project-icon">🔗</div>
+            <div class="project-type">Transformação Digital</div>
+            <div class="project-name">Quer adicionar um projeto específico aqui?</div>
+            <div class="project-desc">Este card está reservado para você! Me conte sobre seus projetos mais relevantes — com nome, descrição, tecnologias usadas e links — e atualizo este portfólio com seus dados reais. Cada projeto merece ser contado com precisão.</div>
+            <div class="project-footer">
+              <div class="project-tags">
+                <span class="project-tag">Seu Projeto</span>
+                <span class="project-tag">Adicione aqui</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ABA: EVENTOS -->
+      <div class="tab-content" id="eventos-tab">
+        <p class="section-label" id="eventos">Participações & Palestras</p>
+        <h2 class="section-title">Eventos &<br>Comunidade</h2>
+        <div class="events-grid">
+
+          <div class="event-card reveal">
+            <div class="event-date-box">
+              <div class="event-day">—</div>
+              <div class="event-mon">2024</div>
+            </div>
+            <div class="event-info">
+              <div class="event-type">Palestra / Talk</div>
+              <div class="event-name">Adicione sua palestra ou evento aqui</div>
+              <div class="event-local">📍 Local do evento</div>
+            </div>
+          </div>
+
+          <div class="event-card reveal">
+            <div class="event-date-box">
+              <div class="event-day">—</div>
+              <div class="event-mon">2024</div>
+            </div>
+            <div class="event-info">
+              <div class="event-type">Workshop</div>
+              <div class="event-name">Automação Inteligente na Prática</div>
+              <div class="event-local">📍 Online / Presencial</div>
+            </div>
+          </div>
+
+          <div class="event-card reveal">
+            <div class="event-date-box">
+              <div class="event-day">—</div>
+              <div class="event-mon">2023</div>
+            </div>
+            <div class="event-info">
+              <div class="event-type">Participação</div>
+              <div class="event-name">Evento de Inovação & Tecnologia</div>
+              <div class="event-local">📍 São Paulo, SP</div>
+            </div>
+          </div>
+
+          <div class="event-card reveal">
+            <div class="event-date-box">
+              <div class="event-day">—</div>
+              <div class="event-mon">2023</div>
+            </div>
+            <div class="event-info">
+              <div class="event-type">Comunidade</div>
+              <div class="event-name">Projetos Especiais — IMT (PAE2AL / PAE4AL)</div>
+              <div class="event-local">📍 Instituto Mauá de Tecnologia</div>
+            </div>
+          </div>
+
+          <div class="event-card reveal" style="grid-column: 1 / -1;">
+            <div class="event-date-box">
+              <div class="event-day">✦</div>
+              <div class="event-mon">—</div>
+            </div>
+            <div class="event-info">
+              <div class="event-type">Sua história é a mais importante</div>
+              <div class="event-name">Personalize esta seção com seus eventos reais!</div>
+              <div class="event-local">Me envie: nome do evento, data, local e seu papel (palestrante, organizadora, participante).</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ABA: FORMAÇÃO -->
+      <div class="tab-content" id="formacao-tab">
+        <p class="section-label" id="formacao">Educação & Certificações</p>
+        <h2 class="section-title">Formação<br>Acadêmica</h2>
+        <div class="edu-grid">
+          <div class="edu-card reveal">
+            <div class="edu-icon">🏛️</div>
+            <div class="edu-degree">Graduação em Engenharia</div>
+            <div class="edu-inst">Instituto Mauá de Tecnologia (IMT)</div>
+            <div class="edu-period">São Caetano do Sul, SP · 2015 – 2019</div>
+          </div>
+          <div class="edu-card reveal">
+            <div class="edu-icon">🤖</div>
+            <div class="edu-degree">Especialização em IA & Automação Inteligente</div>
+            <div class="edu-inst">Formação Contínua</div>
+            <div class="edu-period">2022 – Presente</div>
+          </div>
+          <div class="edu-card reveal">
+            <div class="edu-icon">📈</div>
+            <div class="edu-degree">Marketing Digital & CRM</div>
+            <div class="edu-inst">RD Station / Exact Sales</div>
+            <div class="edu-period">2021 – 2022</div>
+          </div>
+          <div class="edu-card reveal">
+            <div class="edu-icon">🎓</div>
+            <div class="edu-degree">Adicione sua pós-graduação ou MBA aqui</div>
+            <div class="edu-inst">Instituição</div>
+            <div class="edu-period">Período</div>
+          </div>
+        </div>
+
+        <h3 style="font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:700; margin:3rem 0 1.5rem; color:var(--text);">
+          Certificações
+        </h3>
+        <div class="cert-list">
+          <div class="cert-item reveal">
+            <div class="cert-icon">🏅</div>
+            <div>
+              <div class="cert-name">Projetos e Atividades Especiais IV (PAE4AL)</div>
+              <div class="cert-issuer">Instituto Mauá de Tecnologia</div>
+            </div>
+            <div class="cert-badge">Concluído</div>
+          </div>
+          <div class="cert-item reveal">
+            <div class="cert-icon">🏅</div>
+            <div>
+              <div class="cert-name">Projetos e Atividades Especiais II (PAE2AL)</div>
+              <div class="cert-issuer">Instituto Mauá de Tecnologia</div>
+            </div>
+            <div class="cert-badge">Concluído</div>
+          </div>
+          <div class="cert-item reveal">
+            <div class="cert-icon">✦</div>
+            <div>
+              <div class="cert-name">Adicione suas certificações aqui</div>
+              <div class="cert-issuer">Curso / Plataforma · Ano</div>
+            </div>
+            <div class="cert-badge">Em breve</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end section-inner -->
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact-section" id="contato">
+    <div class="contact-inner">
+      <div class="reveal">
+        <h2 class="contact-cta">Vamos construir o<br>futuro <span>juntos?</span></h2>
+        <p class="contact-sub">Se você busca alguém que una visão estratégica, tecnologia de ponta e execução com resultado — vamos conversar. Estou aberta a oportunidades, projetos e colaborações.</p>
+        <a href="https://www.linkedin.com/in/bruna-liborio-tonon" target="_blank" class="btn btn-primary">Conectar no LinkedIn →</a>
+      </div>
+      <div class="contact-links reveal">
+        <a href="https://www.linkedin.com/in/bruna-liborio-tonon" target="_blank" class="contact-link">
+          <div class="contact-link-icon">💼</div>
+          <div>
+            <div class="contact-link-label">LinkedIn</div>
+            <div class="contact-link-val">Bruna Liborio Tonon</div>
+          </div>
+          <div class="contact-link-arrow">→</div>
+        </a>
+        <a href="mailto:seuemail@exemplo.com" class="contact-link">
+          <div class="contact-link-icon">✉️</div>
+          <div>
+            <div class="contact-link-label">E-mail</div>
+            <div class="contact-link-val">seuemail@exemplo.com</div>
+          </div>
+          <div class="contact-link-arrow">→</div>
+        </a>
+        <a href="#" class="contact-link">
+          <div class="contact-link-icon">📱</div>
+          <div>
+            <div class="contact-link-label">WhatsApp / Telefone</div>
+            <div class="contact-link-val">Adicione seu contato aqui</div>
+          </div>
+          <div class="contact-link-arrow">→</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">BLT<span>.</span></div>
+    <div class="footer-copy">© 2025 Bruna Liborio Tonon — Feito com propósito.</div>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursor-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; });
+    function animRing() {
+      rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animRing);
+    }
+    animRing();
+
+    // Tabs
+    function openTab(id) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+      triggerReveal();
+    }
+
+    // Nav tab anchors
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.addEventListener('click', e => {
+        const map = { '#sobre': 'sobre-tab', '#trajetoria': 'trajetoria-tab', '#projetos': 'projetos-tab', '#eventos': 'eventos-tab', '#formacao': 'formacao-tab' };
+        const tabId = map[a.getAttribute('href')];
+        if (tabId) {
+          e.preventDefault();
+          const tabBtns = document.querySelectorAll('.tab-btn');
+          const tabIdx = ['sobre-tab','trajetoria-tab','projetos-tab','eventos-tab','formacao-tab'].indexOf(tabId);
+          document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.getElementById(tabId).classList.add('active');
+          if (tabBtns[tabIdx]) tabBtns[tabIdx].classList.add('active');
+          document.querySelector('.tabs-nav').scrollIntoView({ behavior: 'smooth' });
+          setTimeout(triggerReveal, 100);
+        }
+      });
+    });
+
+    // Scroll reveal
+    function triggerReveal() {
+      const els = document.querySelectorAll('.reveal:not(.visible)');
+      els.forEach((el, i) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 60) {
+          setTimeout(() => el.classList.add('visible'), i * 80);
+        }
+      });
+    }
+
+    // Timeline items
+    function triggerTimeline() {
+      document.querySelectorAll('.timeline-item:not(.visible)').forEach((el, i) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 60) {
+          setTimeout(() => el.classList.add('visible'), i * 100);
+        }
+      });
+    }
+
+    window.addEventListener('scroll', () => { triggerReveal(); triggerTimeline(); });
+    setTimeout(() => { triggerReveal(); triggerTimeline(); }, 200);
+  </script>
+</body>
+</html>
